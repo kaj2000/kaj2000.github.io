@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>つなぐ — 魏 廉潔 ポートフォリオ</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Noto+Serif+JP:wght@400;700&display=swap');
+
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --color-bg: #fafafa;
+            --color-text: #2c2c2c;
+            --color-text-light: #6b6b6b;
+            --color-line: #b0bec5;
+            --color-line-active: #546e7a;
+            --color-real: #c17a50;
+            --color-virtual: #5a7fa5;
+            --color-mixed: #7a6b9a;
+            --font-sans: 'Noto Sans JP', sans-serif;
+            --font-serif: 'Noto Serif JP', serif;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.8;
+            overflow-x: hidden;
+        }
+
+        /* ===== Vertical Line (つなぐ線) ===== */
+        .timeline-track {
+            position: fixed;
+            left: 48px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            z-index: 100;
+            pointer-events: none;
+        }
+
+        .timeline-bg {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 2px;
+            height: 100%;
+            background: #e0e0e0;
+        }
+
+        .timeline-fill {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 2px;
+            height: 0%;
+            background: linear-gradient(to bottom, var(--color-line-active), var(--color-virtual), var(--color-mixed));
+            will-change: height;
+        }
+
+        /* Single origin dot at top of line */
+        .timeline-origin {
+            position: fixed;
+            left: 48px;
+            top: 0;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--color-line-active);
+            transform: translateX(-3px);
+            z-index: 102;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.6s;
+        }
+
+        .timeline-origin.visible {
+            opacity: 1;
+        }
+
+        /* ===== Hero Section ===== */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 80px 120px 80px 100px;
+            position: relative;
+        }
+
+        .hero-title {
+            font-family: var(--font-serif);
+            font-size: clamp(48px, 8vw, 96px);
+            font-weight: 700;
+            letter-spacing: 0.15em;
+            color: var(--color-text);
+            margin-bottom: 8px;
+        }
+
+        .hero-subtitle {
+            font-size: 14px;
+            letter-spacing: 0.5em;
+            color: var(--color-text-light);
+            margin-bottom: 60px;
+        }
+
+        .hero-text {
+            max-width: 560px;
+            font-size: 15px;
+            line-height: 2.2;
+            color: var(--color-text-light);
+        }
+
+        .hero-text p {
+            margin-bottom: 16px;
+        }
+
+        .hero-author {
+            margin-top: 60px;
+        }
+
+        .hero-author .name {
+            font-family: var(--font-serif);
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+        }
+
+        .hero-author .affiliation {
+            font-size: 13px;
+            color: var(--color-text-light);
+            margin-top: 4px;
+        }
+
+        .pdf-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 24px;
+            padding: 10px 24px;
+            font-size: 13px;
+            font-weight: 500;
+            letter-spacing: 0.05em;
+            text-decoration: none;
+            color: var(--color-text);
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .pdf-btn:hover {
+            border-color: #999;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        /* Hero fade-in stagger */
+        .hero-fade {
+            opacity: 0;
+            transform: translateY(24px);
+        }
+
+        .hero-fade.in {
+            opacity: 1;
+            transform: translateY(0);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+
+        .scroll-hint {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .scroll-hint span {
+            font-size: 11px;
+            letter-spacing: 0.3em;
+            color: var(--color-text-light);
+        }
+
+        .scroll-hint .arrow {
+            width: 1px;
+            height: 40px;
+            background: var(--color-line);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .scroll-hint .arrow::after {
+            content: '';
+            position: absolute;
+            top: -40px;
+            left: 0;
+            width: 1px;
+            height: 40px;
+            background: var(--color-line-active);
+            animation: scrollDown 2s infinite;
+        }
+
+        @keyframes scrollDown {
+            0% { top: -40px; }
+            100% { top: 40px; }
+        }
+
+        /* ===== Character Marquee ===== */
+        .character-band {
+            position: relative;
+            overflow: hidden;
+            padding: 40px 0;
+            background: linear-gradient(180deg, transparent, rgba(0,0,0,0.015) 30%, rgba(0,0,0,0.015) 70%, transparent);
+        }
+
+        .character-band::before,
+        .character-band::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 120px;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .character-band::before {
+            left: 0;
+            background: linear-gradient(to right, var(--color-bg), transparent);
+        }
+
+        .character-band::after {
+            right: 0;
+            background: linear-gradient(to left, var(--color-bg), transparent);
+        }
+
+        .marquee-track {
+            display: flex;
+            align-items: flex-end;
+            gap: 60px;
+            width: max-content;
+            animation: marquee 30s linear infinite;
+        }
+
+        .marquee-track:hover {
+            animation-play-state: paused;
+        }
+
+        .marquee-char {
+            flex-shrink: 0;
+            height: 100px;
+            image-rendering: pixelated;
+            opacity: 0.7;
+            transition: opacity 0.3s, transform 0.3s;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.08));
+        }
+
+        .marquee-char:hover {
+            opacity: 1;
+            transform: translateY(-6px);
+        }
+
+        .marquee-char.tall {
+            height: 140px;
+        }
+
+        @keyframes marquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        /* ===== Section Common ===== */
+        .project-section {
+            padding: 100px 120px 100px 100px;
+            position: relative;
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+
+        .project-section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .section-category {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 0.2em;
+            padding: 4px 14px;
+            border-radius: 20px;
+            margin-bottom: 16px;
+        }
+
+        .cat-real {
+            background: rgba(193, 122, 80, 0.12);
+            color: var(--color-real);
+            border: 1px solid rgba(193, 122, 80, 0.3);
+        }
+
+        .cat-virtual {
+            background: rgba(90, 127, 165, 0.12);
+            color: var(--color-virtual);
+            border: 1px solid rgba(90, 127, 165, 0.3);
+        }
+
+        .cat-mixed {
+            background: rgba(122, 107, 154, 0.12);
+            color: var(--color-mixed);
+            border: 1px solid rgba(122, 107, 154, 0.3);
+        }
+
+        .section-year {
+            font-size: 12px;
+            color: var(--color-text-light);
+            letter-spacing: 0.1em;
+            margin-bottom: 8px;
+        }
+
+        .section-title {
+            font-family: var(--font-serif);
+            font-size: clamp(28px, 4vw, 42px);
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: 0.05em;
+        }
+
+        .section-title ruby rt {
+            font-size: 0.45em;
+            font-weight: 400;
+        }
+
+        .section-tagline {
+            font-size: 14px;
+            color: var(--color-text-light);
+            margin-bottom: 32px;
+            letter-spacing: 0.05em;
+        }
+
+        .project-details {
+            display: flex;
+            gap: 40px;
+            margin-bottom: 36px;
+            flex-wrap: wrap;
+        }
+
+        .detail-item {
+            font-size: 13px;
+            color: var(--color-text-light);
+        }
+
+        .detail-item strong {
+            color: var(--color-text);
+            font-weight: 500;
+        }
+
+        .project-description {
+            max-width: 700px;
+            font-size: 14px;
+            line-height: 2;
+            color: #555;
+            margin-bottom: 36px;
+        }
+
+        .project-highlights {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 36px;
+            flex-wrap: wrap;
+        }
+
+        .highlight-tag {
+            font-size: 12px;
+            padding: 6px 16px;
+            background: #f0f0f0;
+            border-radius: 4px;
+            color: var(--color-text);
+            font-weight: 500;
+        }
+
+        .highlight-tag.award {
+            background: rgba(193, 122, 80, 0.1);
+            color: var(--color-real);
+            border: 1px solid rgba(193, 122, 80, 0.2);
+        }
+
+        .cover-image-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 900px;
+            margin-bottom: 32px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+        }
+
+        .cover-image-wrapper img {
+            width: 100%;
+            height: auto;
+            display: block;
+            transition: transform 0.6s ease;
+        }
+
+        .cover-image-wrapper:hover img {
+            transform: scale(1.02);
+        }
+
+        .project-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .project-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 22px;
+            font-size: 13px;
+            font-weight: 500;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            letter-spacing: 0.03em;
+        }
+
+        .project-link.primary {
+            background: var(--color-text);
+            color: white;
+        }
+
+        .project-link.primary:hover {
+            background: #444;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .project-link.secondary {
+            background: white;
+            color: var(--color-text);
+            border: 1px solid #ddd;
+        }
+
+        .project-link.secondary:hover {
+            border-color: #999;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        .project-link svg {
+            width: 14px;
+            height: 14px;
+            flex-shrink: 0;
+        }
+
+        .section-divider {
+            max-width: 900px;
+            height: 1px;
+            background: linear-gradient(to right, transparent, #d0d0d0 20%, #d0d0d0 80%, transparent);
+            margin: 20px 0 20px 100px;
+        }
+
+        /* ===== Closing Section ===== */
+        .closing {
+            min-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 100px 120px 100px 100px;
+            position: relative;
+        }
+
+        .closing-text {
+            max-width: 560px;
+            font-family: var(--font-serif);
+            font-size: 17px;
+            line-height: 2.4;
+            color: var(--color-text);
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 1s, transform 1s;
+        }
+
+        .closing-text.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .closing-text p {
+            margin-bottom: 24px;
+        }
+
+        .closing-label {
+            font-size: 12px;
+            letter-spacing: 0.3em;
+            color: var(--color-text-light);
+            margin-top: 60px;
+            opacity: 0;
+            transition: opacity 1s 0.5s;
+        }
+
+        .closing-label.visible {
+            opacity: 1;
+        }
+
+        /* ===== Footer ===== */
+        footer {
+            padding: 40px 100px;
+            font-size: 12px;
+            color: var(--color-text-light);
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        footer a {
+            color: var(--color-text-light);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        footer a:hover {
+            color: var(--color-text);
+        }
+
+        /* ===== Responsive ===== */
+        @media (max-width: 768px) {
+            .timeline-track,
+            .timeline-origin {
+                display: none;
+            }
+
+            .hero {
+                padding: 60px 24px;
+            }
+
+            .project-section {
+                padding: 60px 24px;
+            }
+
+            .closing {
+                padding: 60px 24px;
+            }
+
+            footer {
+                padding: 30px 24px;
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .project-links {
+                gap: 8px;
+            }
+
+            .project-link {
+                padding: 8px 16px;
+                font-size: 12px;
+            }
+
+            .marquee-char {
+                height: 70px;
+            }
+
+            .marquee-char.tall {
+                height: 100px;
+            }
+
+            .marquee-track {
+                gap: 40px;
+            }
+        }
+
+        @media (min-width: 769px) {
+            .hero,
+            .project-section,
+            .closing {
+                padding-left: 100px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Timeline Track -->
+    <div class="timeline-track">
+        <div class="timeline-bg"></div>
+        <div class="timeline-fill" id="timelineFill"></div>
+    </div>
+    <div class="timeline-origin" id="timelineOrigin"></div>
+
+    <!-- ===== HERO ===== -->
+    <section class="hero" id="hero">
+        <div class="hero-fade" style="transition-delay: 0.1s">
+            <div class="hero-title">つなぐ</div>
+        </div>
+        <div class="hero-fade" style="transition-delay: 0.25s">
+            <div class="hero-subtitle">ポ ー ト フ ォ リ オ</div>
+        </div>
+        <div class="hero-fade" style="transition-delay: 0.5s">
+            <div class="hero-text">
+                <p>世の中には、離れているように見えて、<br>
+                実は一本の線でつながっているものが多くあります。</p>
+                <p>私の名前「廉潔」は、中国語の「連接」と同じ響きを持ち、<br>
+                日本語では「連結」とも読めます。</p>
+                <p>私にとってその線が「つなぐ」です。</p>
+                <p>現実の仕組みを、仮想の体験へ。仮想の物語を、誰かの記憶へ。<br>
+                そして現実×仮想の境界で、人の意図を読み取り、<br>
+                より自然なインタラクションへ。</p>
+                <p>技術で、「体験のつながり」を設計してきました。</p>
+            </div>
+        </div>
+        <div class="hero-fade" style="transition-delay: 0.75s">
+            <div class="hero-author">
+                <div class="name">魏 廉潔（ギ レンケツ）</div>
+                <div class="affiliation">筑波大学大学院 知能機能システム学位プログラム</div>
+            </div>
+            <a href="https://drive.google.com/file/d/140lJgNobjBQMECCDB4P9hf7S_UU9OPsP/view?usp=sharing" class="pdf-btn" target="_blank">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                ポートフォリオ PDF版
+            </a>
+        </div>
+        <div class="hero-fade scroll-hint" style="transition-delay: 1s">
+            <span>SCROLL</span>
+            <div class="arrow"></div>
+        </div>
+    </section>
+
+    <!-- ===== CHARACTER MARQUEE ===== -->
+    <div class="character-band">
+        <div class="marquee-track">
+            <!-- Set 1 -->
+            <img class="marquee-char tall" src="キャラ/奥成.png" alt="奥成" title="奥成 —『氷嬉図』">
+            <img class="marquee-char" src="キャラ/果冻水母桃.png" alt="果冻水母桃" title="果冻水母 —『夢売店』">
+            <img class="marquee-char" src="キャラ/淑雨2D.png" alt="淑雨" title="淑雨 —『氷嬉図』">
+            <img class="marquee-char" src="キャラ/顾客1.png" alt="顧客" title="顧客 —『夢売店』">
+            <img class="marquee-char" src="キャラ/金昆2D.png" alt="金昆" title="金昆 —『氷嬉図』">
+            <img class="marquee-char" src="キャラ/果冻水母橘.png" alt="果冻水母橘" title="果冻水母 —『夢売店』">
+            <img class="marquee-char" src="キャラ/猫豚.png" alt="猫豚" title="猫豚 —『夢売店』">
+            <img class="marquee-char tall" src="キャラ/淑雨.png" alt="淑雨" title="淑雨 —『氷嬉図』">
+            <img class="marquee-char" src="キャラ/果冻水蓝蓝.png" alt="果冻水蓝蓝" title="果冻水母 —『夢売店』">
+            <img class="marquee-char" src="キャラ/云羊.png" alt="云羊" title="云羊 —『夢売店』">
+            <img class="marquee-char" src="キャラ/顾客2.png" alt="顧客" title="顧客 —『夢売店』">
+            <img class="marquee-char" src="キャラ/奥成2D.png" alt="奥成" title="奥成 —『氷嬉図』">
+            <img class="marquee-char" src="キャラ/奔跑的羊.png" alt="奔跑的羊" title="奔跑的羊 —『夢売店』">
+            <!-- Set 2 (duplicate for seamless loop) -->
+            <img class="marquee-char tall" src="キャラ/奥成.png" alt="奥成" title="奥成 —『氷嬉図』">
+            <img class="marquee-char" src="キャラ/果冻水母桃.png" alt="果冻水母桃" title="果冻水母 —『夢売店』">
+            <img class="marquee-char" src="キャラ/淑雨2D.png" alt="淑雨" title="淑雨 —『氷嬉図』">
+            <img class="marquee-char" src="キャラ/顾客1.png" alt="顧客" title="顧客 —『夢売店』">
+            <img class="marquee-char" src="キャラ/金昆2D.png" alt="金昆" title="金昆 —『氷嬉図』">
+            <img class="marquee-char" src="キャラ/果冻水母橘.png" alt="果冻水母橘" title="果冻水母 —『夢売店』">
+            <img class="marquee-char" src="キャラ/猫豚.png" alt="猫豚" title="猫豚 —『夢売店』">
+            <img class="marquee-char tall" src="キャラ/淑雨.png" alt="淑雨" title="淑雨 —『氷嬉図』">
+            <img class="marquee-char" src="キャラ/果冻水蓝蓝.png" alt="果冻水蓝蓝" title="果冻水母 —『夢売店』">
+            <img class="marquee-char" src="キャラ/云羊.png" alt="云羊" title="云羊 —『夢売店』">
+            <img class="marquee-char" src="キャラ/顾客2.png" alt="顧客" title="顧客 —『夢売店』">
+            <img class="marquee-char" src="キャラ/奥成2D.png" alt="奥成" title="奥成 —『氷嬉図』">
+            <img class="marquee-char" src="キャラ/奔跑的羊.png" alt="奔跑的羊" title="奔跑的羊 —『夢売店』">
+        </div>
+    </div>
+
+    <!-- ===== PROJECT 1: 多機能スマート窓 ===== -->
+    <section class="project-section" id="section-0" data-category="real">
+        <span class="section-category cat-real">現実</span>
+        <div class="section-year">2020年 7月 - 8月</div>
+        <h2 class="section-title">多機能スマート窓</h2>
+        <p class="section-tagline">現実世界の環境変化を検知し、窓の動作へとつなぐIoTシステム</p>
+
+        <div class="project-details">
+            <div class="detail-item"><strong>開発期間</strong>　2ヶ月</div>
+            <div class="detail-item"><strong>人数</strong>　5人（チーム制作）</div>
+            <div class="detail-item"><strong>担当</strong>　チームリーダー・電子技術・制御システム</div>
+            <div class="detail-item"><strong>技術</strong>　C / マイコン</div>
+        </div>
+
+        <p class="project-description">
+            環境変化（雨・ガス等）に応じて窓を安全に自動制御するIoTシステム。光・雨・ガス・人感の4種センサーからの入力を閾値判定と状態遷移で処理し、ステッピングモータと電磁石で窓を駆動。人体検知時の安全停止設計や、ESP32によるWi-Fi遠隔操作への拡張も可能。
+        </p>
+
+        <div class="project-highlights">
+            <span class="highlight-tag award">実用新案取得（筆頭）CN 213180138 U</span>
+        </div>
+
+        <div class="cover-image-wrapper">
+            <img src="封面图/智能窗.png" alt="多機能スマート窓">
+        </div>
+
+        <div class="project-links">
+            <a href="https://drive.google.com/file/d/1dEoxPIxe31lGG4x8zURAyqpcbnfheVBA/view?usp=sharing" class="project-link primary" target="_blank">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="m8 21h8M12 17v4"/></svg>
+                紹介スライド
+            </a>
+            <a href="https://drive.google.com/file/d/1xA1bu_o3f0NQcDzSRUT8vevYSbFO1zGD/view?usp=sharing" class="project-link secondary" target="_blank">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                作動動画
+            </a>
+            <a href="https://patents.google.com/patent/CN213180138U/en?oq=CN+213180138+U" class="project-link secondary" target="_blank">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                実用新案（Google Patents）
+            </a>
+        </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- ===== PROJECT 2: 氷嬉図 ===== -->
+    <section class="project-section" id="section-1" data-category="virtual">
+        <span class="section-category cat-virtual">仮想</span>
+        <div class="section-year">2021年 3月</div>
+        <h2 class="section-title">『氷嬉図』</h2>
+        <p class="section-tagline">仮想世界で「文化と体験」をつなぐストーリーアクション</p>
+
+        <div class="project-details">
+            <div class="detail-item"><strong>開発期間</strong>　1ヶ月</div>
+            <div class="detail-item"><strong>人数</strong>　2人（未経験から制作開始）</div>
+            <div class="detail-item"><strong>担当</strong>　企画・シナリオ・レベル設計・Unity実装</div>
+            <div class="detail-item"><strong>技術</strong>　C# / Unity2018.4.32f1</div>
+        </div>
+
+        <p class="project-description">
+            氷雪文化の原点「氷嬉大典」を追うため、主人公は時空シミュレーションで「清王朝」へ。遊びながら「歴史の記憶」に触れる2D横スクロールゲーム。全5ステージで操作体験を段階的に変化させ、コレクション要素で史実エピソードを解放する設計。絵そのもののように、失われた「背後の記憶」を受け取る体験へ。
+        </p>
+
+        <div class="project-highlights">
+            <span class="highlight-tag award">中国大学生コンピューター設計大会「二等賞」受賞</span>
+            <span class="highlight-tag">全5ステージ＋ストーリー演出＋コレクション要素（約25分）</span>
+        </div>
+
+        <div class="cover-image-wrapper">
+            <img src="封面图/冰嬉图.png" alt="氷嬉図">
+        </div>
+
+        <div class="project-links">
+            <a href="https://drive.google.com/file/d/1R5l526QSG0SEsRUp4SAZNm07kfhwHoHS/view?usp=sharing" class="project-link primary" target="_blank">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="m8 21h8M12 17v4"/></svg>
+                紹介スライド
+            </a>
+            <a href="https://drive.google.com/file/d/1bXNJhFuuD0dA6V3egh_BajbeazZc_Rht/view?usp=sharing" class="project-link secondary" target="_blank">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                プレイ動画
+            </a>
+            <a href="https://drive.google.com/file/d/17m-BO9IMHsZl3uBHrTCVk5AY05uLbNR2/view?usp=drive_link" class="project-link secondary" target="_blank">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                PV動画
+            </a>
+            <a href="https://drive.google.com/file/d/1DpHkfYhN-4RIBruWzM3ra6lMQqaJdGpc/view?usp=sharing" class="project-link secondary" target="_blank">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+                ソースコード
+            </a>
+            <a href="https://drive.google.com/drive/folders/1mwtbhuSNMVkkoV6RV_OL0aVXkjufa645?usp=sharing" class="project-link secondary" target="_blank">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                実行ファイル(中国語版のみ)
+            </a>
+        </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- ===== PROJECT 3: 夢売店 ===== -->
+    <section class="project-section" id="section-2" data-category="virtual">
+        <span class="section-category cat-virtual">仮想</span>
+        <div class="section-year">2026年 3月</div>
+        <h2 class="section-title">夢売店</h2>
+        <p class="section-tagline">日常の秩序と夢の狂気をつなぐタイムマネジメントゲーム</p>
+
+        <div class="project-details">
+            <div class="detail-item"><strong>開発期間</strong>　7日間</div>
+            <div class="detail-item"><strong>人数</strong>　1人（個人制作）</div>
+            <div class="detail-item"><strong>イベント</strong>　1週間ゲームジャム（お題：「うら」）</div>
+            <div class="detail-item"><strong>技術</strong>　C# / Unity6000.3.9f1</div>
+        </div>
+
+        <p class="project-description">
+            コンビニバイトでの実体験をもとに、秩序だった日常業務と制御不能な夢の混乱をつないだゲームジャム作品。準備→通常営業→裏営業（夢境化）の3段階構成で、前半の整理行動が後半の生存率へ接続する設計。プレイヤーからは「裏営業から一気にゲームの面白さが押し寄せてきました！」との声も。
+        </p>
+
+        <div class="project-highlights">
+            <span class="highlight-tag">全3ステージ（約10分）</span>
+            <span class="highlight-tag">1週間ゲームジャム出展作品</span>
+        </div>
+
+        <div class="cover-image-wrapper">
+            <img src="封面图/夢売店.png" alt="夢売店">
+        </div>
+
+        <div class="project-links">
+            <a href="https://drive.google.com/file/d/1MhQvn0VnZxmswEvOgeVTjkdTGQE8apBI/view?usp=drive_link" class="project-link primary" target="_blank">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="m8 21h8M12 17v4"/></svg>
+                紹介スライド
+            </a>
+            <a href="https://drive.google.com/file/d/1CfuSMa60f1JriIB-OQj5nOzYOc95nZnF/view?usp=drive_link" class="project-link secondary" target="_blank">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                プレイ動画
+            </a>
+            <a href="https://github.com/kaj2000/Dream-Shop-GameJam-Ver" class="project-link secondary" target="_blank">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+                ソースコード
+            </a>
+        </div>
+        <div class="project-links" style="margin-top: 8px;">
+            <a href="https://unityroom.com/games/dreamshop" class="project-link primary" target="_blank">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+                今すぐプレイ（unityroomWEB版/DL不要）
+            </a>
+            <a href="https://drive.google.com/drive/folders/1wvq-x7DUD2JvLybh8DztG1hvj1jLiJJB?usp=drive_link" class="project-link secondary" target="_blank">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                実行ファイル(日本語版のみ)
+            </a>
+        </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- ===== PROJECT 4: 修士研究 ===== -->
+    <section class="project-section" id="section-3" data-category="mixed">
+        <span class="section-category cat-mixed">現実 × 仮想</span>
+        <div class="section-year">2025年 5月 - 現在</div>
+        <h2 class="section-title">修士研究</h2>
+        <p class="section-tagline">現実×仮想のインタラクションをつなぐ — VR操作における短期動作予測に基づく意図推定と適応的操作支援</p>
+
+        <div class="project-details">
+            <div class="detail-item"><strong>所属</strong>　筑波大学大学院</div>
+            <div class="detail-item"><strong>技術</strong>　C# / Unity / Python / PyTorch</div>
+        </div>
+
+        <p class="project-description">
+            VR空間での空中操作特有の手ブレやUI誤選択に対し、GRUモデルによる短期動作予測で意図を先読みし、操作アシストへ接続する研究。手部（コントローラ）と頭部（HMD）の位置・回転データから、100ms先の動作方向と意図を同時推定。推定結果をUnity上のハイライトやスナップ補助へリアルタイム接続する構成。
+        </p>
+
+        <div class="project-highlights">
+            <span class="highlight-tag">ExGRUモデル — マルチモーダル入力</span>
+            <span class="highlight-tag">意図＋対象を同時推定</span>
+            <span class="highlight-tag">リアルタイム操作支援</span>
+        </div>
+
+        <div class="cover-image-wrapper">
+            <img src="封面图/修士研究.png" alt="修士研究">
+        </div>
+
+        <div class="project-links">
+            <a href="https://drive.google.com/file/d/1dcW0MUVkX0WdQJ7X46nMMe3Pqgnp8K_Q/view?usp=sharing" class="project-link primary" target="_blank">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="m8 21h8M12 17v4"/></svg>
+                研究紹介スライド
+            </a>
+            <a href="https://drive.google.com/file/d/1GyOmpKqr81Xt_ddGAZJPmx98E5LG9aNR/view?usp=sharing" class="project-link secondary" target="_blank">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                ポスター
+            </a>
+        </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- ===== PROJECT 5: 夢売店VR試作 ===== -->
+    <section class="project-section" id="section-4" data-category="mixed">
+        <span class="section-category cat-mixed">現実 × 仮想</span>
+        <div class="section-year">2026年 3月 - 現在</div>
+        <h2 class="section-title">夢売店VR<span style="font-size:0.6em; font-weight:400; color:var(--color-text-light);">（初期試作・構想）</span></h2>
+        <p class="section-tagline">修士研究と『夢売店』を接続する今後の構想</p>
+
+        <div class="project-details">
+            <div class="detail-item"><strong>技術</strong>　C# / Unity / Python</div>
+            <div class="detail-item"><strong>状態</strong>　初期試作・体験方向の検討段階</div>
+        </div>
+
+        <p class="project-description">
+            『夢売店』の混乱した接客体験を3DのVR空間へ拡張する構想。飛散・浮遊する商品に対し、空間内での把持・選別を行うゲーム体験。2D版よりも強い空間的混乱と没入感を実現し、修士研究で扱うGRUモデルによる把持予測・意図推定の適用先として検討中。
+        </p>
+
+        <div class="cover-image-wrapper">
+            <img src="封面图/夢売店VR.png" alt="夢売店VR試作">
+        </div>
+    </section>
+
+    <!-- ===== CLOSING ===== -->
+    <section class="closing" id="closing">
+        <div class="closing-text" id="closingText">
+            <p>つなぐ、という言葉は<br>私にとって一本の線です。</p>
+            <p>現実と仮想のあいだ。<br>仕組みと体験のあいだ。</p>
+            <p>そして、失われたものの背後に残る記憶のあいだ。</p>
+            <p>私はその「あいだ」に線を引き、<br>人の心が動く体験をつくりたい。</p>
+            <p>未来へ向けて、<ruby>つながり<rt>レンケツ</rt></ruby>はまだ続きます。</p>
+        </div>
+        <div class="closing-label" id="closingLabel"></div>
+    </section>
+
+    <!-- ===== FOOTER ===== -->
+    <footer>
+        <span>&copy; 2026 魏 廉潔</span>
+        <span>K  A  J</span>
+    </footer>
+
+    <script>
+        // ===== Hero staggered fade-in (no CSS animation, JS-driven for reliability) =====
+        window.addEventListener('DOMContentLoaded', () => {
+            const heroFades = document.querySelectorAll('.hero-fade');
+            // Trigger each with its transition-delay
+            requestAnimationFrame(() => {
+                heroFades.forEach(el => el.classList.add('in'));
+            });
+        });
+
+        // ===== Scroll-driven timeline =====
+        const timelineFill = document.getElementById('timelineFill');
+        const timelineOrigin = document.getElementById('timelineOrigin');
+        const sections = document.querySelectorAll('.project-section');
+        const closingText = document.getElementById('closingText');
+        const closingLabel = document.getElementById('closingLabel');
+
+        function updateTimeline() {
+            const scrollTop = window.scrollY;
+            const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const scrollPercent = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+            timelineFill.style.height = scrollPercent + '%';
+
+            // Show origin dot once user starts scrolling
+            timelineOrigin.classList.toggle('visible', scrollTop > 10);
+        }
+
+        // ===== Intersection Observer for fade-in =====
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        sections.forEach(section => observer.observe(section));
+        observer.observe(closingText);
+        observer.observe(closingLabel);
+
+        // ===== Scroll listener =====
+        let ticking = false;
+        window.addEventListener('scroll', () => {
+            if (!ticking) {
+                requestAnimationFrame(() => {
+                    updateTimeline();
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        });
+
+        updateTimeline();
+    </script>
+
+</body>
+</html>
