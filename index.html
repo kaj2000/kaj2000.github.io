@@ -96,6 +96,53 @@
             justify-content: center;
             padding: 80px 120px 80px 100px;
             position: relative;
+            overflow: hidden;
+            background: #0a0a0a;
+        }
+
+        /* Video background */
+        .hero-video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* Overlay for text readability — darker on left side where text sits */
+        .hero-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                linear-gradient(90deg, rgba(10,10,15,0.78) 0%, rgba(10,10,15,0.55) 45%, rgba(10,10,15,0.3) 100%),
+                linear-gradient(180deg, rgba(10,10,15,0.4) 0%, rgba(10,10,15,0) 25%, rgba(10,10,15,0) 55%, rgba(10,10,15,0.45) 80%, var(--color-bg) 100%);
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        /* Soft fade at very bottom of hero into marquee — characters seem to emerge from the scene */
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 80px;
+            background: linear-gradient(180deg, transparent 0%, var(--color-bg) 100%);
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        /* All hero content sits above video */
+        .hero > .hero-fade {
+            position: relative;
+            z-index: 2;
         }
 
         .hero-title {
@@ -103,14 +150,15 @@
             font-size: clamp(48px, 8vw, 96px);
             font-weight: 700;
             letter-spacing: 0.15em;
-            color: var(--color-text);
+            color: #ffffff;
             margin-bottom: 8px;
+            text-shadow: 0 2px 24px rgba(0,0,0,0.4);
         }
 
         .hero-subtitle {
             font-size: 14px;
             letter-spacing: 0.5em;
-            color: var(--color-text-light);
+            color: rgba(255,255,255,0.75);
             margin-bottom: 60px;
         }
 
@@ -118,7 +166,8 @@
             max-width: 560px;
             font-size: 15px;
             line-height: 2.2;
-            color: var(--color-text-light);
+            color: rgba(255,255,255,0.88);
+            text-shadow: 0 1px 12px rgba(0,0,0,0.5);
         }
 
         .hero-text p {
@@ -134,11 +183,13 @@
             font-size: 20px;
             font-weight: 700;
             letter-spacing: 0.1em;
+            color: #ffffff;
+            text-shadow: 0 1px 12px rgba(0,0,0,0.5);
         }
 
         .hero-author .affiliation {
             font-size: 13px;
-            color: var(--color-text-light);
+            color: rgba(255,255,255,0.7);
             margin-top: 4px;
         }
 
@@ -152,16 +203,19 @@
             font-weight: 500;
             letter-spacing: 0.05em;
             text-decoration: none;
-            color: white;
-            background: var(--color-text);
+            color: #1a1a1a;
+            background: rgba(255,255,255,0.95);
+            border: 1px solid rgba(255,255,255,0.4);
             border-radius: 6px;
             transition: all 0.3s ease;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
         }
 
         .pdf-btn:hover {
-            background: #444;
+            background: #ffffff;
             transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
         }
 
         /* Hero fade-in stagger */
@@ -177,26 +231,40 @@
         }
 
         .scroll-hint {
-            position: absolute;
-            bottom: 40px;
+            position: fixed;
+            bottom: 28px;
             left: 50%;
             transform: translateX(-50%);
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 8px;
+            z-index: 50;
+            opacity: 0;
+            transition: opacity 0.6s ease 0.5s;
+            pointer-events: none;
+        }
+
+        .scroll-hint.in {
+            opacity: 1;
+        }
+
+        .scroll-hint.hidden {
+            opacity: 0 !important;
+            transition: opacity 0.35s ease;
         }
 
         .scroll-hint span {
             font-size: 11px;
             letter-spacing: 0.3em;
-            color: var(--color-text-light);
+            color: rgba(255,255,255,0.9);
+            text-shadow: 0 1px 8px rgba(0,0,0,0.5);
         }
 
         .scroll-hint .arrow {
             width: 1px;
             height: 40px;
-            background: var(--color-line);
+            background: rgba(255,255,255,0.3);
             position: relative;
             overflow: hidden;
         }
@@ -208,7 +276,7 @@
             left: 0;
             width: 1px;
             height: 40px;
-            background: var(--color-line-active);
+            background: rgba(255,255,255,0.9);
             animation: scrollDown 2s infinite;
         }
 
@@ -221,8 +289,8 @@
         .character-band {
             position: relative;
             overflow: hidden;
-            padding: 40px 0;
-            background: linear-gradient(180deg, transparent, rgba(0,0,0,0.015) 30%, rgba(0,0,0,0.015) 70%, transparent);
+            padding: 60px 0 50px;
+            background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.02) 50%, transparent 100%);
         }
 
         .character-band::before,
@@ -550,12 +618,15 @@
             }
 
             .scroll-hint {
-                position: relative;
-                bottom: auto;
-                left: auto;
-                transform: none;
-                margin-top: 40px;
-                align-items: flex-start;
+                bottom: 20px;
+            }
+
+            .scroll-hint span {
+                font-size: 10px;
+            }
+
+            .scroll-hint .arrow {
+                height: 30px;
             }
 
             .project-section {
@@ -614,6 +685,10 @@
 
     <!-- ===== HERO ===== -->
     <section class="hero" id="hero">
+        <video class="hero-video" autoplay muted loop playsinline preload="auto" poster="封面图/夢売店.png">
+            <source src="video/video.mp4" type="video/mp4">
+        </video>
+        <div class="hero-overlay"></div>
         <div class="hero-fade" style="transition-delay: 0.1s">
             <div class="hero-title">つなぐ</div>
         </div>
@@ -643,11 +718,12 @@
                 ポートフォリオ PDF版
             </a>
         </div>
-        <div class="hero-fade scroll-hint" style="transition-delay: 1s">
-            <span>SCROLL</span>
-            <div class="arrow"></div>
-        </div>
     </section>
+
+    <div class="scroll-hint" id="scrollHint">
+        <span>SCROLL</span>
+        <div class="arrow"></div>
+    </div>
 
     <!-- ===== CHARACTER MARQUEE ===== -->
     <div class="character-band">
@@ -954,17 +1030,25 @@
 
     <script>
         // ===== Hero staggered fade-in (no CSS animation, JS-driven for reliability) =====
-        window.addEventListener('DOMContentLoaded', () => {
+        function triggerHeroFades() {
             const heroFades = document.querySelectorAll('.hero-fade');
-            // Trigger each with its transition-delay
-            requestAnimationFrame(() => {
+            const sh = document.getElementById('scrollHint');
+            // Tiny defer so the browser registers initial state before transition triggers
+            setTimeout(() => {
                 heroFades.forEach(el => el.classList.add('in'));
-            });
-        });
+                if (sh) sh.classList.add('in');
+            }, 16);
+        }
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', triggerHeroFades);
+        } else {
+            triggerHeroFades();
+        }
 
         // ===== Scroll-driven timeline =====
         const timelineFill = document.getElementById('timelineFill');
         const timelineOrigin = document.getElementById('timelineOrigin');
+        const scrollHint = document.getElementById('scrollHint');
         const sections = document.querySelectorAll('.project-section');
         const closingText = document.getElementById('closingText');
         const closingLabel = document.getElementById('closingLabel');
@@ -977,6 +1061,11 @@
 
             // Show origin dot once user starts scrolling
             timelineOrigin.classList.toggle('visible', scrollTop > 10);
+
+            // Hide scroll hint once user scrolls
+            if (scrollHint) {
+                scrollHint.classList.toggle('hidden', scrollTop > 80);
+            }
         }
 
         // ===== Intersection Observer for fade-in =====
